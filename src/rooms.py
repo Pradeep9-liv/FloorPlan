@@ -54,6 +54,7 @@ import json
 lab_pt = np.zeros(len(p), dtype=int)
 lab_pt[inside] = labels[ia[inside], ib[inside]]
 MIN_CEIL_POINTS = 5000      # fewer points than this: do not trust the ceiling
+PRIOR_LOW, PRIOR_HIGH = 2.3, 3.3   # provisional prior, not calibrated
 
 rooms = []
 for k in range(1, labels.max() + 1):
@@ -61,7 +62,6 @@ for k in range(1, labels.max() + 1):
     vis = m.sum() * cell * cell
     if vis < 1.5:
         continue
-    # filled area: close small gaps (furniture), but never cross walls
     mf = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_CLOSE,
                           np.ones((11, 11), np.uint8)) > 0
     mf = ndi.binary_fill_holes(mf) & ~walls_d
@@ -76,13 +76,20 @@ for k in range(1, labels.max() + 1):
         near = hh[np.abs(hh - pk) < 0.02]
         ceil_h, npts = float(np.median(near)), int(len(near))
         flag = "ok" if npts >= MIN_CEIL_POINTS else "low_confidence"
+    ok = flag == "ok"
+    top = float(np.percentile(h[lab_pt == k], 99.9))
     cy, cx = ndi.center_of_mass(m)
     rooms.append({
         "id": k,
         "centre_cells": [round(float(cy)), round(float(cx))],
-        "area_m2": {"visible_floor": round(vis, 2), "filled": round(filled, 2)},
-        "ceiling_height_m": round(ceil_h, 3) if flag == "ok" else None,
-        "ceiling_candidate_m": None if ceil_h is None else round(ceil_h, 3),
+        "area_m2": {"scanned_floor_lower_bound": round(vis, 2),
+                    "filled_estimate": round(filled, 2)},
+        "area_note": "lower bound only: floor the phone never saw is not counted",
+        "ceiling_height_m": round(ceil_h, 3) if ok else None,
+        "ceiling_interval_m": ([round(ceil_h - 0.02, 3), round(ceil_h + 0.02, 3)]
+                               if ok else [round(max(top, PRIOR_LOW), 2), PRIOR_HIGH]),
+        "ceiling_basis": "measured" if ok else "prior_only_ceiling_not_captured",
+        "highest_point_seen_m": round(top, 2),
         "ceiling_points": npts,
         "ceiling_flag": flag,
         "interval_status": "provisional_uncalibrated",
@@ -94,13 +101,14 @@ with open("plan.json", "w") as f:
     json.dump(out, f, indent=2)
 
 print(f"marker threshold = {marker_m} m, rooms kept = {len(rooms)}")
-print("\nid  visible_m2  filled_m2  ceiling_m  points   flag")
+print("\nid  scanned_m2  filled_m2  ceiling_m  interval_m      flag")
 for r in rooms:
     c = r["ceiling_height_m"]
-    print(f"{r['id']:<3} {r['area_m2']['visible_floor']:9.2f} "
-          f"{r['area_m2']['filled']:10.2f} "
-          f"{('-' if c is None else f'{c:.3f}'):>9} "
-          f"{r['ceiling_points']:7d}   {r['ceiling_flag']}")
+    iv = r["ceiling_interval_m"]
+    print(f"{r['id']:<3} {r['area_m2']['scanned_floor_lower_bound']:9.2f} "
+          f"{r['area_m2']['filled_estimate']:10.2f} "
+          f"{('-' if c is None else f'{c:.3f}'):>9}  "
+          f"[{iv[0]:.2f}, {iv[1]:.2f}]   {r['ceiling_flag']}")
 
 # 5. Picture
 rng = np.random.default_rng(3)
