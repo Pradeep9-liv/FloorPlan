@@ -1,7 +1,20 @@
 import os
 import numpy as np
 
-METHOD = os.environ.get("DIMS_METHOD", "rays")   # "bbox" reproduces the before run
+METHOD = os.environ.get("DIMS_METHOD", "rays")
+
+AGG = os.environ.get("DIMS_AGG", "cluster")   # "median" reproduces fix v1
+
+def _agg(ds):
+    ds = np.sort(np.asarray(ds, float))
+    if AGG == "median":
+        return float(np.median(ds))
+    best = ds[:1]
+    for i in range(len(ds)):
+        j = np.searchsorted(ds, ds[i] + 0.30, side="right")
+        if j - i > len(best):
+            best = ds[i:j]
+    return float(np.median(best))   # "bbox" reproduces the before run
 
 
 def _first_hit(walls, a0, b0, cell, start, axis, sign, max_m=12.0):
@@ -48,5 +61,5 @@ def wall_to_wall(walls, a0, b0, cell, wa, wb, p0, axis,
             ds.append(sign * (pk - start[axis]))
         if len(ds) < min_rays:
             return None
-        side[sign] = float(np.median(ds))
+        side[sign] = _agg(ds)
     return side[-1] + side[+1]
