@@ -1,0 +1,315 @@
+{
+  "source": "data\\single_scan_with_ceiling\\c7d28f72c6",
+  "marker_threshold_m": 0.5,
+  "wall_rotation_deg": 28.5,
+  "rooms": [
+    {
+      "id": 1,
+      "centre_m": [
+        0.714,
+        1.535
+      ],
+      "extent_m": {
+        "a": [
+          -0.642,
+          2.158
+        ],
+        "b": [
+          -1.172,
+          4.328
+        ]
+      },
+      "size_m": [
+        2.721,
+        3.145
+      ],
+      "size_method": [
+        "wall_to_wall",
+        "wall_to_wall"
+      ],
+      "centre_cells": [
+        86,
+        135
+      ],
+      "area_m2": {
+        "scanned_floor_lower_bound": 8.05,
+        "filled_estimate": 8.16
+      },
+      "area_note": "lower bound only: floor the phone never saw is not counted",
+      "ceiling_height_m": 2.959,
+      "ceiling_interval_m": [
+        2.939,
+        2.979
+      ],
+      "ceiling_basis": "measured",
+      "highest_point_seen_m": 3.08,
+      "ceiling_points": 43552,
+      "ceiling_flag": "ok",
+      "interval_status": "provisional_uncalibrated"
+    },
+    {
+      "id": 2,
+      "centre_m": [
+        1.053,
+        7.501
+      ],
+      "extent_m": {
+        "a": [
+          0.458,
+          1.658
+        ],
+        "b": [
+          6.478,
+          8.778
+        ]
+      },
+      "size_m": [
+        3.461,
+        3.081
+      ],
+      "size_method": [
+        "wall_to_wall",
+        "wall_to_wall"
+      ],
+      "centre_cells": [
+        93,
+        254
+      ],
+      "area_m2": {
+        "scanned_floor_lower_bound": 1.54,
+        "filled_estimate": 1.56
+      },
+      "area_note": "lower bound only: floor the phone never saw is not counted",
+      "ceiling_height_m": null,
+      "ceiling_interval_m": [
+        2.3,
+        3.3
+      ],
+      "ceiling_basis": "prior_only_ceiling_not_captured",
+      "highest_point_seen_m": 2.97,
+      "ceiling_points": 718,
+      "ceiling_flag": "low_confidence",
+      "interval_status": "provisional_uncalibrated"
+    },
+    {
+      "id": 3,
+      "centre_m": [
+        2.437,
+        7.473
+      ],
+      "extent_m": {
+        "a": [
+          1.608,
+          3.158
+        ],
+        "b": [
+          5.878,
+          9.078
+        ]
+      },
+      "size_m": [
+        2.899,
+        5.206
+      ],
+      "size_method": [
+        "wall_to_wall",
+        "wall_to_wall"
+      ],
+      "centre_cells": [
+        121,
+        254
+      ],
+      "area_m2": {
+        "scanned_floor_lower_bound": 3.88,
+        "filled_estimate": 3.89
+      },
+      "area_note": "lower bound only: floor the phone never saw is not counted",
+      "ceiling_height_m": 2.412,
+      "ceiling_interval_m": [
+        2.392,
+        2.432
+      ],
+      "ceiling_basis": "measured",
+      "highest_point_seen_m": 2.49,
+      "ceiling_points": 55900,
+      "ceiling_flag": "ok",
+      "interval_status": "provisional_uncalibrated"
+    },
+    {
+      "id": 4,
+      "centre_m": [
+        2.162,
+        4.784
+      ],
+      "extent_m": {
+        "a": [
+          1.258,
+          3.108
+        ],
+        "b": [
+          3.728,
+          5.978
+        ]
+      },
+      "size_m": [
+        2.028,
+        8.68
+      ],
+      "size_method": [
+        "wall_to_wall",
+        "wall_to_wall"
+      ],
+      "centre_cells": [
+        115,
+        200
+      ],
+      "area_m2": {
+        "scanned_floor_lower_bound": 2.79,
+        "filled_estimate": 2.82
+      },
+      "area_note": "lower bound only: floor the phone never saw is not counted",
+      "ceiling_height_m": 2.434,
+      "ceiling_interval_m": [
+        2.414,
+        2.454
+      ],
+      "ceiling_basis": "measured",
+      "highest_point_seen_m": 2.46,
+      "ceiling_points": 43492,
+      "ceiling_flag": "ok",
+      "interval_status": "provisional_uncalibrated"
+    },
+    {
+      "id": 5,
+      "centre_m": [
+        3.706,
+        2.93
+      ],
+      "extent_m": {
+        "a": [
+          2.508,
+          5.408
+        ],
+        "b": [
+          0.578,
+          4.678
+        ]
+      },
+      "size_m": [
+        2.854,
+        4.316
+      ],
+      "size_method": [
+        "wall_to_wall",
+        "wall_to_wall"
+      ],
+      "centre_cells": [
+        146,
+        163
+      ],
+      "area_m2": {
+        "scanned_floor_lower_bound": 8.3,
+        "filled_estimate": 8.52
+      },
+      "area_note": "lower bound only: floor the phone never saw is not counted",
+      "ceiling_height_m": 2.44,
+      "ceiling_interval_m": [
+        2.42,
+        2.46
+      ],
+      "ceiling_basis": "measured",
+      "highest_point_seen_m": 3.11,
+      "ceiling_points": 35923,
+      "ceiling_flag": "ok",
+      "interval_status": "provisional_uncalibrated"
+    },
+    {
+      "id": 6,
+      "centre_m": [
+        6.454,
+        2.103
+      ],
+      "extent_m": {
+        "a": [
+          5.408,
+          8.008
+        ],
+        "b": [
+          -0.022,
+          4.528
+        ]
+      },
+      "size_m": [
+        3.139,
+        3.712
+      ],
+      "size_method": [
+        "wall_to_wall",
+        "wall_to_wall"
+      ],
+      "centre_cells": [
+        201,
+        147
+      ],
+      "area_m2": {
+        "scanned_floor_lower_bound": 5.57,
+        "filled_estimate": 5.76
+      },
+      "area_note": "lower bound only: floor the phone never saw is not counted",
+      "ceiling_height_m": 3.077,
+      "ceiling_interval_m": [
+        3.057,
+        3.097
+      ],
+      "ceiling_basis": "measured",
+      "highest_point_seen_m": 3.11,
+      "ceiling_points": 43843,
+      "ceiling_flag": "ok",
+      "interval_status": "provisional_uncalibrated"
+    },
+    {
+      "id": 7,
+      "centre_m": [
+        7.673,
+        4.84
+      ],
+      "extent_m": {
+        "a": [
+          6.408,
+          8.908
+        ],
+        "b": [
+          3.678,
+          5.928
+        ]
+      },
+      "size_m": [
+        2.549,
+        2.283
+      ],
+      "size_method": [
+        "wall_to_wall",
+        "wall_to_wall"
+      ],
+      "centre_cells": [
+        225,
+        201
+      ],
+      "area_m2": {
+        "scanned_floor_lower_bound": 3.94,
+        "filled_estimate": 4.0
+      },
+      "area_note": "lower bound only: floor the phone never saw is not counted",
+      "ceiling_height_m": 2.343,
+      "ceiling_interval_m": [
+        2.323,
+        2.363
+      ],
+      "ceiling_basis": "measured",
+      "highest_point_seen_m": 2.48,
+      "ceiling_points": 51654,
+      "ceiling_flag": "ok",
+      "interval_status": "provisional_uncalibrated"
+    }
+  ]
+}
