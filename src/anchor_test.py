@@ -89,3 +89,14 @@ for nm, x in (("anchored (floor height / 1.42 m)", err), ("unanchored (one globa
           + f"   within 20%: {100 * (np.abs(x) < .20).mean():.0f}%")
 print("note: orientation of 'down' comes from recorded poses (optimistic);"
       " 1.42 m and the global ratio were both chosen on these same frames")
+
+
+print("\n--- plausibility gate (fixed in calib/prereg_anchor_gate.md) ---")
+acc = (a[:, 4] >= 0.7) & (a[:, 4] <= 2.0)
+print(f"frames accepted by the gate: {acc.sum()} of {len(pick)} ({100 * acc.sum() / len(pick):.0f}%)")
+if acc.sum() >= 5:
+    e = err[acc]
+    p = np.percentile(e, [5, 25, 50, 75, 95])
+    print("error among accepted 5/25/50/75/95%: " + "  ".join(f"{100 * v:+.0f}%" for v in p)
+          + f"   within 10%: {100 * (np.abs(e) < .10).mean():.0f}%"
+          + f"   within 20%: {100 * (np.abs(e) < .20).mean():.0f}%")
