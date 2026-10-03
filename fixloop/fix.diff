@@ -1,0 +1,122 @@
+﻿diff --git a/src/dims.py b/src/dims.py
+new file mode 100644
+index 00000000..b93ea549
+--- /dev/null
++++ b/src/dims.py
+@@ -0,0 +1,65 @@
++import os
++import numpy as np
++
++METHOD = os.environ.get("DIMS_METHOD", "rays")
++
++AGG = os.environ.get("DIMS_AGG", "cluster")   # "median" reproduces fix v1
++
++def _agg(ds):
++    ds = np.sort(np.asarray(ds, float))
++    if AGG == "median":
++        return float(np.median(ds))
++    best = ds[:1]
++    for i in range(len(ds)):
++        j = np.searchsorted(ds, ds[i] + 0.30, side="right")
++        if j - i > len(best):
++            best = ds[i:j]
++    return float(np.median(best))   # "bbox" reproduces the before run
++
++
++def _first_hit(walls, a0, b0, cell, start, axis, sign, max_m=12.0):
++    for k in range(1, int(max_m / cell)):
++        q = np.array(start, float)
++        q[axis] += sign * k * cell
++        i = int(np.floor((q[0] - a0) / cell))
++        j = int(np.floor((q[1] - b0) / cell))
++        if 0 <= i < walls.shape[0] and 0 <= j < walls.shape[1] and walls[i, j]:
++            return k * cell
++    return None
++
++
++def wall_to_wall(walls, a0, b0, cell, wa, wb, p0, axis,
++                 lat_offsets=np.arange(-0.5, 0.51, 0.1), min_rays=5):
++    """Distance between the two walls on either side of p0 along `axis`.
++    Median over parallel rays; each ray is refined to a 1 cm density peak."""
++    if METHOD == "bbox":
++        return None
++    along = (wa, wb)[axis]
++    lateral = (wb, wa)[axis]
++    side = {}
++    for sign in (-1, +1):
++        ds = []
++        for off in lat_offsets:
++            start = list(p0)
++            start[1 - axis] += off
++            d0 = _first_hit(walls, a0, b0, cell, start, axis, sign)
++            if d0 is None:
++                continue
++            hit = start[axis] + sign * d0
++            sel = ((np.abs(lateral - start[1 - axis]) < 0.05)
++                   & (along > hit - 0.07) & (along < hit + 0.07))
++            x = along[sel]
++            if len(x) < 30:
++                continue
++            edges = np.arange(hit - 0.07, hit + 0.0701, 0.01)
++            cnt, e = np.histogram(x, bins=edges)
++            sm = np.convolve(cnt, np.ones(3), mode="same")
++            k = int(np.argmax(sm))
++            lo, hi = max(0, k - 1), min(len(cnt), k + 2)
++            ctr = (e[:-1] + e[1:]) / 2
++            pk = float((cnt[lo:hi] * ctr[lo:hi]).sum() / max(1, cnt[lo:hi].sum()))
++            ds.append(sign * (pk - start[axis]))
++        if len(ds) < min_rays:
++            return None
++        side[sign] = _agg(ds)
++    return side[-1] + side[+1]
+\ No newline at end of file
+diff --git a/src/plan.py b/src/plan.py
+index 1be017a1..e34a3114 100644
+--- a/src/plan.py
++++ b/src/plan.py
+@@ -14,7 +14,7 @@ def main():
+     cap = find_capture(root)
+     n = len(pd.read_csv(os.path.join(cap, "odometry.csv")))
+     override = len(sys.argv) > 2
+-    step = int(sys.argv[2]) if override else max(1, n // 320)
++    step = int(sys.argv[2]) if override else max(2, n // 900)
+     name = os.path.basename(os.path.normpath(root))
+     out = os.path.join("out", f"{name}_s{step}" if override else name)
+     os.makedirs(out, exist_ok=True)
+diff --git a/src/rooms.py b/src/rooms.py
+index 0ddff3ec..2f61f1aa 100644
+--- a/src/rooms.py
++++ b/src/rooms.py
+@@ -50,6 +50,9 @@ labels = watershed(-dist, markers, mask=free)
+ 
+ # 4. Measure each room
+ import json
++import dims
++band_m = (h > 0.3) & (h < 2.0)
++wa, wb = a[band_m], b[band_m]
+ 
+ lab_pt = np.zeros(len(p), dtype=int)
+ lab_pt[inside] = labels[ia[inside], ib[inside]]
+@@ -83,13 +86,20 @@ for k in range(1, labels.max() + 1):
+     rb = np.where(m.any(axis=0))[0]
+     a_lo, a_hi = a0 + ra.min() * cell, a0 + (ra.max() + 1) * cell
+     b_lo, b_hi = b0 + rb.min() * cell, b0 + (rb.max() + 1) * cell
++    p0 = [a0 + cy * cell, b0 + cx * cell]
++    sa = dims.wall_to_wall(walls, a0, b0, cell, wa, wb, p0, 0)
++    sb = dims.wall_to_wall(walls, a0, b0, cell, wa, wb, p0, 1)
++    size_m = [round(sa if sa is not None else a_hi - a_lo, 3),
++              round(sb if sb is not None else b_hi - b_lo, 3)]
++    size_method = ["wall_to_wall" if sa is not None else "grid_extent",
++                   "wall_to_wall" if sb is not None else "grid_extent"]
+     rooms.append({
+         "id": k,
+         "centre_m": [round(a0 + cy * cell, 3), round(b0 + cx * cell, 3)],
+         "extent_m": {"a": [round(a_lo, 3), round(a_hi, 3)],
+                      "b": [round(b_lo, 3), round(b_hi, 3)]},
+-        "size_m": [round(a_hi - a_lo, 3), round(b_hi - b_lo, 3)],
+-        "size_method": "grid_extent",
++        "size_m": size_m,
++        "size_method": size_method,
+         "centre_cells": [round(float(cy)), round(float(cx))],
+         "area_m2": {"scanned_floor_lower_bound": round(vis, 2),
+                     "filled_estimate": round(filled, 2)},
