@@ -7,7 +7,7 @@ def load_depth(path):
         d = np.load(path).astype(np.float32)
     elif ext in (".png", ".tiff", ".tif"):
         import cv2
-        d = cv2.imread(path, cv2.IMREAD_UNCHANGED).astype(np.float32)
+        d = cv2.imread(path, cv2.IMREAD_UNCHANGED).astype(np.float32) / 1000.0
     elif ext == ".bin":
         d = np.fromfile(path, dtype=np.float32).reshape(192, 256)
     elif ext == ".exr":
@@ -75,6 +75,8 @@ def fuse(folder, step=8, flip=True, rot_k=0, min_conf=2, scale=7.5):
 
 def score(cloud, vox=0.03):
     # lower = surfaces overlap more consistently
+    if len(cloud) == 0:
+        return float("inf")
     q = np.floor(cloud / vox).astype(np.int64)
     return len(np.unique(q, axis=0)) / len(cloud)
 
@@ -83,7 +85,7 @@ if __name__ == "__main__":
     inspect(folder)
     res = []
     for flip, k in itertools.product([False, True], range(4)):
-        c = fuse(folder, step=20, flip=flip, rot_k=k)
+        c = fuse(folder, step=100, flip=flip, rot_k=k)
         res.append((score(c), flip, k))
         print("flip", flip, "rot", k, "score", round(res[-1][0], 4))
     print("best:", min(res))
