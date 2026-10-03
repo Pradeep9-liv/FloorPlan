@@ -1,5 +1,9 @@
 cache/
-plan.json
+/plan.json
 rooms.png
 sfm_log.txt
 out/
+.venv/
+data/
+__pycache__/
+/*.png
