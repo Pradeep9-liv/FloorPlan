@@ -50,6 +50,9 @@ labels = watershed(-dist, markers, mask=free)
 
 # 4. Measure each room
 import json
+import dims
+band_m = (h > 0.3) & (h < 2.0)
+wa, wb = a[band_m], b[band_m]
 
 lab_pt = np.zeros(len(p), dtype=int)
 lab_pt[inside] = labels[ia[inside], ib[inside]]
@@ -83,13 +86,20 @@ for k in range(1, labels.max() + 1):
     rb = np.where(m.any(axis=0))[0]
     a_lo, a_hi = a0 + ra.min() * cell, a0 + (ra.max() + 1) * cell
     b_lo, b_hi = b0 + rb.min() * cell, b0 + (rb.max() + 1) * cell
+    p0 = [a0 + cy * cell, b0 + cx * cell]
+    sa = dims.wall_to_wall(walls, a0, b0, cell, wa, wb, p0, 0)
+    sb = dims.wall_to_wall(walls, a0, b0, cell, wa, wb, p0, 1)
+    size_m = [round(sa if sa is not None else a_hi - a_lo, 3),
+              round(sb if sb is not None else b_hi - b_lo, 3)]
+    size_method = ["wall_to_wall" if sa is not None else "grid_extent",
+                   "wall_to_wall" if sb is not None else "grid_extent"]
     rooms.append({
         "id": k,
         "centre_m": [round(a0 + cy * cell, 3), round(b0 + cx * cell, 3)],
         "extent_m": {"a": [round(a_lo, 3), round(a_hi, 3)],
                      "b": [round(b_lo, 3), round(b_hi, 3)]},
-        "size_m": [round(a_hi - a_lo, 3), round(b_hi - b_lo, 3)],
-        "size_method": "grid_extent",
+        "size_m": size_m,
+        "size_method": size_method,
         "centre_cells": [round(float(cy)), round(float(cx))],
         "area_m2": {"scanned_floor_lower_bound": round(vis, 2),
                     "filled_estimate": round(filled, 2)},
