@@ -33,7 +33,7 @@ for deg in np.arange(0, 90, 0.5):
     score = (ha.astype(float) ** 2).sum() + (hb.astype(float) ** 2).sum()
     if score > best_score:
         best_deg, best_score = deg, score
-print(f"room rotation = {best_deg:.1f} degrees  (hand-picked earlier: 28.6)")
+print(f"room rotation = {best_deg:.1f} degrees")
 
 # 3. Wall map: cells that have points at many different heights
 t = np.radians(best_deg)
