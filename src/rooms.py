@@ -79,15 +79,25 @@ for k in range(1, labels.max() + 1):
     ok = flag == "ok"
     top = float(np.percentile(h[lab_pt == k], 99.9))
     cy, cx = ndi.center_of_mass(m)
+    ra = np.where(m.any(axis=1))[0]
+    rb = np.where(m.any(axis=0))[0]
+    a_lo, a_hi = a0 + ra.min() * cell, a0 + (ra.max() + 1) * cell
+    b_lo, b_hi = b0 + rb.min() * cell, b0 + (rb.max() + 1) * cell
     rooms.append({
         "id": k,
+        "centre_m": [round(a0 + cy * cell, 3), round(b0 + cx * cell, 3)],
+        "extent_m": {"a": [round(a_lo, 3), round(a_hi, 3)],
+                     "b": [round(b_lo, 3), round(b_hi, 3)]},
+        "size_m": [round(a_hi - a_lo, 3), round(b_hi - b_lo, 3)],
+        "size_method": "grid_extent",
         "centre_cells": [round(float(cy)), round(float(cx))],
         "area_m2": {"scanned_floor_lower_bound": round(vis, 2),
                     "filled_estimate": round(filled, 2)},
         "area_note": "lower bound only: floor the phone never saw is not counted",
         "ceiling_height_m": round(ceil_h, 3) if ok else None,
         "ceiling_interval_m": ([round(ceil_h - 0.02, 3), round(ceil_h + 0.02, 3)]
-                               if ok else [round(max(top, PRIOR_LOW), 2), PRIOR_HIGH]),
+                               if ok else [round(max(top, PRIOR_LOW), 2) if vis >= 3
+                                           else PRIOR_LOW, PRIOR_HIGH]),
         "ceiling_basis": "measured" if ok else "prior_only_ceiling_not_captured",
         "highest_point_seen_m": round(top, 2),
         "ceiling_points": npts,

@@ -13,8 +13,10 @@ def main():
     root = sys.argv[1]
     cap = find_capture(root)
     n = len(pd.read_csv(os.path.join(cap, "odometry.csv")))
-    step = max(1, n // 320)
-    out = os.path.join("out", os.path.basename(os.path.normpath(root)))
+    override = len(sys.argv) > 2
+    step = int(sys.argv[2]) if override else max(1, n // 320)
+    name = os.path.basename(os.path.normpath(root))
+    out = os.path.join("out", f"{name}_s{step}" if override else name)
     os.makedirs(out, exist_ok=True)
     print(f"capture: {cap}  frames: {n}  step: {step}")
 
