@@ -74,3 +74,37 @@ for r in rooms:
               + f"   {spread:6.3f} {tol:6.3f}  {'PASS' if ok else 'FAIL'}")
 print(f"\n{npass} of {ntot} wall-to-wall distances within tolerance")
 print("a ray that escapes through a doorway gives a long distance: read those rows with care")
+
+print("\n--- which side moves, and why ---")
+
+def hist_peaks(vals, center, half=0.4, bw=0.02):
+    if len(vals) < 50:
+        return []
+    edges = np.arange(center - half, center + half + bw, bw)
+    h, e = np.histogram(vals, bins=edges)
+    hs = np.convolve(h, np.ones(3) / 3, mode="same")
+    out = []
+    for i in range(1, len(hs) - 1):
+        if hs[i] >= hs[i - 1] and hs[i] > hs[i + 1] and hs[i] > 0.2 * hs.max():
+            out.append((round(100 * (e[i] + bw / 2 - center)), int(h[i])))
+    return out
+
+for r in rooms:
+    if r["area_m2"]["scanned_floor_lower_bound"] < 3:
+        continue
+    p0 = r["centre_m"]
+    for axis, name in ((0, "a"), (1, "b")):
+        for sign, side in ((-1, "-"), (+1, "+")):
+            line = f"room {r['id']} {name}{side}:"
+            for s in steps:
+                wall, amin, bmin, a, b = data[s]
+                d = ray(wall, amin, bmin, a, b, p0, axis, sign)
+                if d is None:
+                    line += f"  s{s}: none |"
+                    continue
+                center = p0[axis] + sign * d
+                al = (a, b)[axis]
+                la = (b, a)[axis]
+                sel = (np.abs(al - center) < 0.4) & (np.abs(la - p0[1 - axis]) < 0.15)
+                line += f"  s{s}: d={d:.3f} peaks(cm:count)={hist_peaks(al[sel], center)} |"
+            print(line)
