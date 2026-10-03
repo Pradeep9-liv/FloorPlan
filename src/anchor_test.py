@@ -100,3 +100,22 @@ if acc.sum() >= 5:
     print("error among accepted 5/25/50/75/95%: " + "  ".join(f"{100 * v:+.0f}%" for v in p)
           + f"   within 10%: {100 * (np.abs(e) < .10).mean():.0f}%"
           + f"   within 20%: {100 * (np.abs(e) < .20).mean():.0f}%")
+
+
+
+print("\n--- room-level scale: median of k accepted frames (gate from the pre-registration) ---")
+idx = np.where(acc)[0]
+rng = np.random.default_rng(0)
+for k in (2, 4, 8):
+    if len(idx) < k:
+        continue
+    res = []
+    for _ in range(2000):
+        sub = rng.choice(idx, size=k, replace=False)
+        res.append(np.median(a[sub, 4]) / np.median(a[sub, 3]) - 1)
+    res = np.array(res)
+    p = np.percentile(res, [5, 25, 50, 75, 95])
+    print(f"k={k} frames: scale error 5/25/50/75/95%: " + "  ".join(f"{100 * v:+.0f}%" for v in p)
+          + f"   within 10%: {100 * (np.abs(res) < .10).mean():.0f}%"
+          + f"   within 20%: {100 * (np.abs(res) < .20).mean():.0f}%")
+print("lengths: true = estimated x (1 + scale error). Frames drawn at random from the whole walk.")
